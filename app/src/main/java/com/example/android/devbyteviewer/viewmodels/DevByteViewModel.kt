@@ -20,15 +20,11 @@ package com.example.android.devbyteviewer.viewmodels
 import android.app.Application
 import androidx.lifecycle.*
 import com.example.android.devbyteviewer.database.getDatabase
-import com.example.android.devbyteviewer.domain.Video
-import com.example.android.devbyteviewer.network.Network
-import com.example.android.devbyteviewer.network.asDomainModel
 import com.example.android.devbyteviewer.repository.VideosRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 /**
  * DevByteViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
@@ -47,6 +43,7 @@ class DevByteViewModel(application: Application) : AndroidViewModel(application)
      *
      * Cancelling this job will cancel all coroutines started by this ViewModel.
      */
+
     private val viewModelJob = SupervisorJob()
 
     /**
@@ -57,8 +54,8 @@ class DevByteViewModel(application: Application) : AndroidViewModel(application)
      */
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    val database = getDatabase(application)
-    val repository = VideosRepository(database)
+    private val database = getDatabase(application)
+    private val repository = VideosRepository(database)
 
     init {
         viewModelScope.launch {
@@ -67,7 +64,6 @@ class DevByteViewModel(application: Application) : AndroidViewModel(application)
     }
 
     val playlist = repository.videos
-
 
     /**
      * Cancel all coroutines when the ViewModel is cleared
@@ -80,7 +76,7 @@ class DevByteViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Factory for constructing DevByteViewModel with parameter
      */
-    class Factory(val app: Application) : ViewModelProvider.Factory {
+    class Factory(private val app: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(DevByteViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
