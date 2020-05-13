@@ -26,6 +26,7 @@ import com.example.android.devbyteviewer.network.Network
 import com.example.android.devbyteviewer.network.asDatabaseModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class VideosRepository(private val database: VideosDatabase) {
 
@@ -34,8 +35,8 @@ class VideosRepository(private val database: VideosDatabase) {
      */
     val videos: LiveData<List<Video>> =
             Transformations.map(database.videoDao.getVideos()) {
-        it.asDomainModel()
-    }
+                it.asDomainModel()
+            }
 
     /**
      * Refresh the videos stored in the offline cache.
@@ -47,9 +48,15 @@ class VideosRepository(private val database: VideosDatabase) {
      * To actually load the videos for use, observe [videos]
      */
     suspend fun refreshVideos() {
-        withContext(Dispatchers.IO) {
-            val playlist = Network.devbytes.getPlaylist().await()
-            database.videoDao.insertAll(*playlist.asDatabaseModel())
+        try {
+            withContext(Dispatchers.IO) {
+                val playlist = Network.devbytes.getPlaylist().await()
+                database.videoDao.insertAll(*playlist.asDatabaseModel())
+            }
+
+        } catch (e: Exception) {
+            Timber.i("Problem with internet connection")
         }
+
     }
 }
